@@ -1,0 +1,807 @@
+<!doctype html>
+
+<meta charset="utf-8">
+<title>寻找好大学</title>
+<link href="css/style.css"  rel="stylesheet" type="text/css" media="all" />
+<script src="
+./js/echarts.min.js"></script>
+<script src="./js/echarts-gl.min.js"></script>
+<script src="js/jquery-3.2.0.min.js" charset="utf-8"></script>
+<script src="beijing.js"></script>
+<link rel="stylesheet" href="./js/element_ui.css">
+
+<link href="css/style2.css" rel="stylesheet" type="text/css">
+
+<!-- 引入组件库 -->
+<script src="./js/element-ui.js"></script>
+
+<link href="../styles/common.css" rel="stylesheet">
+<link href="../styles/bootstrap-table.css" rel="stylesheet">
+<link href="../styles/pagination.css" rel="stylesheet">
+<script src="../scripts/common.js"></script>
+<script src="../scripts/chronic.js"></script>
+
+<body>
+  <div class="wpbox" id="app">
+    <div class="bnt">
+      <div class="topbnt_left fl">
+        <ul>
+          <li class="active"><a href="./collegeInfo.html">大学信息</a></li>
+          <li><a href="./teacher.html">招生人员</a></li>
+          <li><a href="./admin.html">管理员</a></li>
+        </ul>
+      </div>
+      <h1 class="tith1 fl">寻找好大学</h1>
+      <div class="topbnt_left fr">
+        <ul>
+          <li><a href="./admin.html">用户：admin</a></li>
+          <li><a href="./home.html">退出</a></li>
+        </ul>
+    </div>
+    </div>
+
+    <div class="left1" style="width: 95%; margin-top: -50px;">
+
+      <!-- 大学信息表start -->
+<div class="arightboxbott" style="height: 95%;">
+  <h2 class="tith2 pt1">大学信息表</h2>
+
+  <!-- Table Container Start给表设个容器 -->
+  <div class="table-container">
+      <el-table
+          hover-row="false"
+          :data="filteredColleges.length ? filteredColleges : resultShowTable"
+          border 
+          style="width: 100%; overflow-y: auto;"
+          height="620px">
+          <!-- Table columns -->
+      </el-table>
+  </div>
+  <!-- Table Container End -->
+</div>
+
+
+        <!-- 搜索框start -->
+        <div class="search-bar" style="width: 90%; margin: 0 auto; text-align: center;">
+          <el-input
+            v-model="searchText"
+            placeholder="请输入大学id，大学名称，大学类型，省份或城市"
+            clearable
+            @clear="clearSearch"
+            @keyup.enter.native="searchCollege"
+          >
+            <el-button slot="append" icon="el-icon-search" @click="searchCollege"></el-button>
+          </el-input>
+        </div>
+        <!-- 搜索框end -->
+
+        <!-- 学费范围选择 -->
+        <!-- 学校排名范围选择 -->
+        <!-- 直接在表头右侧加一个上下箭头选择正序倒序排序数组 -->
+  
+        <!-- 是否提供川菜 -->
+        <!-- 菜系筛选按钮与下拉选项 -->
+        <div class="cuisine-filter-container">
+          <div class="cuisine-filter-button">
+              <img src="../img/小笼包.jpg" alt="小笼包" class="cuisine-icon">
+              <button onclick="toggleMenu('cuisine-options')">菜系筛选</button>
+          </div>
+      </div>
+
+
+      <div id="cuisine-options" style="display: none;">
+      <label for="has-sichuan-cuisine">川菜有无:</label>
+      <select id="has-sichuan-cuisine">
+          <option value="yes">有</option>
+          <option value="no">无</option>
+      </select>
+
+      <label for="has-cantonese-cuisine">粤菜有无:</label>
+      <select id="has-cantonese-cuisine">
+          <option value="yes">有</option>
+          <option value="no">无</option>
+      </select>
+
+      <label for="has-shandong-cuisine">鲁菜有无:</label>
+      <select id="has-shandong-cuisine">
+          <option value="yes">有</option>
+          <option value="no">无</option>
+      </select>
+
+      <label for="has-fujian-cuisine">闽菜有无:</label>
+      <select id="has-fujian-cuisine">
+          <option value="yes">有</option>
+          <option value="no">无</option>
+      </select>
+
+      <label for="has-jiangsu-cuisine">苏菜有无:</label>
+      <select id="has-jiangsu-cuisine">
+          <option value="yes">有</option>
+          <option value="no">无</option>
+      </select>
+
+      <label for="has-zhejiang-cuisine">浙菜有无:</label>
+      <select id="has-zhejiang-cuisine">
+          <option value="yes">有</option>
+          <option value="no">无</option>
+      </select>
+
+      <label for="has-hunan-cuisine">湘菜有无:</label>
+      <select id="has-hunan-cuisine">
+          <option value="yes">有</option>
+          <option value="no">无</option>
+      </select>
+
+      <label for="has-huizhou-cuisine">徽菜有无:</label>
+      <select id="has-huizhou-cuisine">
+          <option value="yes">有</option>
+          <option value="no">无</option>
+      </select>
+
+      <label for="has-northeast-cuisine">东北菜有无:</label>
+      <select id="has-northeast-cuisine">
+          <option value="yes">有</option>
+          <option value="no">无</option>
+      </select>
+
+      <label for="has-western-cuisine">西餐有无:</label>
+      <select id="has-western-cuisine">
+          <option value="yes">有</option>
+          <option value="no">无</option>
+      </select>
+  </div>
+</div>
+        <br>
+        <!-- 宿舍条件筛选按钮与下拉选项 -->
+        <div class="dormitory-filter-container">
+          <div class="dormitory-filter-button">
+              <img src="../img/宿舍.jpg" alt="宿舍" class="dormitory-icon">
+              <button onclick="toggleMenu('dormitory-options')">宿舍条件</button>
+          </div>
+      </div>
+  <div id="dormitory-options" style="display: none;">
+      <!-- 独立卫浴 -->
+      <label for="has-independent-bathroom">是否为独立卫浴:</label>
+      <select id="has-independent-bathroom">
+          <option value="yes">有</option>
+          <option value="no">无</option>
+      </select>
+
+      <!-- 是否有空调 -->
+      <label for="has-air-conditioner">是否有空调:</label>
+      <select id="has-air-conditioner">
+          <option value="yes">有</option>
+          <option value="no">无</option>
+      </select>
+
+      <!-- 是否上床下桌 -->
+      <label for="everyone-has-bed-and-table">是否上床下桌:</label>
+      <select id="everyone-has-bed-and-table">
+          <option value="yes">有</option>
+          <option value="no">无</option>
+      </select>
+
+      <!-- 本科几人间 -->
+      <label for="undergraduate-room-number">本科几人间:</label>
+      <select id="undergraduate-room-number">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+      </select>
+  </div>
+</div>
+
+
+        <br>
+        <!-- 大学类型选择 -->
+        <label for="university-type">大学类型:</label>
+        <select id="university-type">
+            <option value="985">985</option>
+            <option value="211">211</option>
+            <option value="double_first_class">双一流</option>
+            <option value="first_tier">一本</option>
+            <option value="second_tier">二本</option>
+            <option value="college">专科</option>
+            <option value="foreign">国外</option>
+            <option value="ivy_league">常青藤</option>
+        </select>
+
+        <!-- 博士点有无 -->
+        <label for="has-doctoral-point">博士点有无:</label>
+        <select id="has-doctoral-point">
+            <option value="yes">有</option>
+            <option value="no">无</option>
+        </select>
+
+        <!-- 省份选择 -->
+        <label for="province">省份:</label>
+        <select id="province">
+            <option value="beijing">北京</option>
+            <option value="shanghai">上海</option>
+            <option value="guangdong">广东</option>
+            <!-- 其他省份 -->
+        </select>
+
+        <!-- 城市选择 -->
+        <label for="city">城市:</label>
+        <select id="city">
+            <option value="guangzhou">广州</option>
+            <option value="shenzhen">深圳</option>
+            <option value="beijing">北京</option>
+            <!-- 其他城市 -->
+        </select>
+
+        <!-- 滚动列表start -->
+        <el-table
+        hover-row="false"
+        :data="filteredColleges.length ? filteredColleges : resultShowTable"
+        border 
+        style="width: 90%; margin: 10px auto 0; overflow-y: auto;"
+        height="620px"> <!-- 设置高度 -->
+        <el-table-column
+          prop="college_id"
+          label="大学id" align="center"
+          width="100">
+        </el-table-column>
+        <el-table-column
+          prop="college_name"
+          label="大学名称" align="center"
+          width="150">
+        </el-table-column>
+        <el-table-column
+          prop="min_fee"
+          label="最低学费" align="center">
+        </el-table-column>
+        <el-table-column
+          prop="max_fee"
+          label="最高学费" align="center">
+        </el-table-column>
+        <el-table-column
+          prop="college_rank"
+          label="大学排名" align="center"
+          :formatter="formatDate">
+        </el-table-column>
+        <el-table-column
+          prop="college_type"
+          label="大学类型" align="center"
+          :formatter="formatDate">
+        </el-table-column>
+        <el-table-column
+          prop="has_doctoral_point"
+          label="博士点有无" align="center">
+        </el-table-column>
+        <el-table-column
+          prop="province"
+          label="省份" align="center">
+        </el-table-column>
+        <el-table-column
+        prop="city"
+        label="城市" align="center">
+        </el-table-column>
+
+
+        <el-table-column
+        prop="dormitory_id"
+        label="宿舍楼标识" align="center">
+        </el-table-column>
+
+
+        <el-table-column
+        prop="canteen_id"
+        label="食堂标识" align="center">
+        </el-table-column>
+        </el-table>
+        <!-- 滚动列表end -->
+    
+      </div>
+      <!-- 大学信息表end -->
+
+    </div>
+
+    <div class="mrbox prbox"  style="width: 50%;height: 125%;">
+      <div class="mrbox_bottom" style="margin-top: 3%;">
+      </div>
+    </div>
+  </div>
+<script src="./js/axios.min.js"></script>
+<script src="./js/qs.min.js"></script>
+<script src="./js/vue.js"></script>
+<script src="./js/element-ui.js"></script>
+<script src="./js/moment.js"></script>
+<script src="./js/xlsx.core.min.js"></script>
+<script src="./js/datav.map.vue.js"></script>
+<script>
+  function toggleCuisineMenu() {
+    var cuisineOptions = document.getElementById('cuisine-options');
+    if (cuisineOptions.style.display === 'none') {
+        cuisineOptions.style.display = 'block';
+    } else {
+        cuisineOptions.style.display = 'none';
+    }
+}
+  </script>
+  <script>
+     function toggleDormitoryMenu() {
+    var dormitoryOptions = document.getElementById('dormitory-options');
+    if (dormitoryOptions.style.display === 'none') {
+        dormitoryOptions.style.display = 'block';
+    } else {
+        dormitoryOptions.style.display = 'none';
+    }
+}
+  </script>
+
+ <!-- 当任何一个筛选被打开时，大学信息表都会下移，从而避免被覆盖 -->
+<script>
+function toggleMenu(menuId) {
+    var options = document.getElementById(menuId);
+    var tableContainer = document.querySelector('.table-container'); // Target the new table container
+
+    if (options.style.display === 'none' || options.style.display === '') {
+        options.style.display = 'block';
+        tableContainer.style.marginTop = '300px'; // Move the table down to make space for the menu
+    } else {
+        options.style.display = 'none';
+        tableContainer.style.marginTop = '0px'; // Reset when the menu is closed
+    }
+}
+
+</script>
+
+<script>
+new Vue({
+  el: '#app',
+  data: {
+    searchText: '',
+    filteredColleges: [],
+    resultShowTable: [
+    // 示例数据
+    {
+      college_id: 1,
+      college_name: "College 1",
+      min_fee: 6000,
+      max_fee: 7000,
+      college_rank: 1,
+      college_type: "985",
+      has_doctoral_point: "yes",
+      province: "北京",
+      city: "北京",
+      dormitory_id: 2,
+      canteen_id: 3
+    },
+    {
+      college_id: 2,
+      college_name: "College 2",
+      min_fee: 1500,
+      max_fee: 2500,
+      college_rank: 2,
+      college_type: "211",
+      has_doctoral_point: "no",
+      province: "上海",
+      city: "上海",
+      dormitory_id: 2,
+      canteen_id: 2
+    },
+    {
+      college_id: 3,
+      college_name: "College 3",
+      min_fee: 2000,
+      max_fee: 3000,
+      college_rank: 3,
+      college_type: "双一流",
+      has_doctoral_point: "yes",
+      province: "广东",
+      city: "广州",
+      dormitory_id: 3,
+      canteen_id: 3
+    },
+    {
+      college_id: 4,
+      college_name: "College 4",
+      min_fee: 3000,
+      max_fee: 4000,
+      college_rank: 4,
+      college_type: "一本",
+      has_doctoral_point: "yes",
+      province: "北京",
+      city: "北京",
+      dormitory_id: 4,
+      canteen_id: 4
+    },
+    {
+      college_id: 5,
+      college_name: "College 5",
+      min_fee: 4000,
+      max_fee: 5000,
+      college_rank: 5,
+      college_type: "二本",
+      has_doctoral_point: "no",
+      province: "上海",
+      city: "上海",
+      dormitory_id: 2,
+      canteen_id: 3
+    },
+    {
+      college_id: 6,
+      college_name: "College 6",
+      min_fee: 5000,
+      max_fee: 6000,
+      college_rank: 6,
+      college_type: "college",
+      has_doctoral_point: "yes",
+      province: "广东",
+      city: "广州",
+      dormitory_id: 4,
+      canteen_id: 3
+    },
+    {
+      college_id: 7,
+      college_name: "College 7",
+      min_fee: 6000,
+      max_fee: 7000,
+      college_rank: 7,
+      college_type: "国外",
+      has_doctoral_point: "no",
+      province: "北京",
+      city: "北京",
+      dormitory_id: 7,
+      canteen_id: 7
+    },
+    {
+      college_id: 8,
+      college_name: "College 8",
+      min_fee: 7000,
+      max_fee: 8000,
+      college_rank: 8,
+      college_type: "常青藤",
+      has_doctoral_point: "yes",
+      province: "上海",
+      city: "上海",
+      dormitory_id: 8,
+      canteen_id: 8
+    },
+    {
+      college_id: 9,
+      college_name: "College 9",
+      min_fee: 8000,
+      max_fee: 9000,
+      college_rank: 9,
+      college_type: "985",
+      has_doctoral_point: "no",
+      province: "广东",
+      city: "广州",
+      dormitory_id: 9,
+      canteen_id: 9
+    },
+    {
+      college_id: 10,
+      college_name: "College 10",
+      min_fee: 9000,
+      max_fee: 10000,
+      college_rank: 10,
+      college_type: "211",
+      has_doctoral_point: "yes",
+      province: "北京",
+      city: "北京",
+      dormitory_id: 0,
+      canteen_id: 0
+    },
+    {
+      college_id: 11,
+      college_name: "College 11",
+      min_fee: 60000,
+      max_fee: 11000,
+      college_rank: 11,
+      college_type: "二本",
+      has_doctoral_point: "no",
+      province: "上海",
+      city: "上海",
+      dormitory_id: 1,
+      canteen_id: 1
+    },
+    {
+      college_id: 12,
+      college_name: "College 12",
+      min_fee: 11000,
+      max_fee: 12000,
+      college_rank: 12,
+      college_type: "一本",
+      has_doctoral_point: "yes",
+      province: "广东",
+      city: "广州",
+      dormitory_id: 2,
+      canteen_id: 2
+    },
+    {
+      college_id: 13,
+      college_name: "College 13",
+      min_fee: 12000,
+      max_fee: 13000,
+      college_rank: 13,
+      college_type: "二本",
+      has_doctoral_point: "no",
+      province: "北京",
+      city: "北京",
+      dormitory_id: 3,
+      canteen_id: 3
+    },
+    {
+      college_id: 14,
+      college_name: "College 14",
+      min_fee: 13000,
+      max_fee: 14000,
+      college_rank: 14,
+      college_type: "college",
+      has_doctoral_point: "yes",
+      province: "上海",
+      city: "上海",
+      dormitory_id: 4,
+      canteen_id: 4
+    },
+    {
+      college_id: 15,
+      college_name: "College 15",
+      min_fee: 14000,
+      max_fee: 15000,
+      college_rank: 15,
+      college_type: "国外",
+      has_doctoral_point: "no",
+      province: "广东",
+      city: "广州",
+      dormitory_id: 5,
+      canteen_id: 5
+    },
+    {
+      college_id: 16,
+      college_name: "College 16",
+      min_fee: 15000,
+      max_fee: 16000,
+      college_rank: 16,
+      college_type: "常青藤",
+      has_doctoral_point: "yes",
+      province: "北京",
+      city: "北京",
+      dormitory_id: 6,
+      canteen_id: 6
+    },
+    {
+      college_id: 17,
+      college_name: "College 17",
+      min_fee: 16000,
+      max_fee: 17000,
+      college_rank: 17,
+      college_type: "985",
+      has_doctoral_point: "no",
+      province: "上海",
+      city: "上海",
+      dormitory_id: 7,
+      canteen_id: 7
+    }
+  ]
+
+},
+
+  methods: {
+    searchCollege() {
+      if (!this.searchText.trim()) {
+        this.filteredColleges = this.resultShowTable;
+      } else {
+        this.filteredColleges = this.resultShowTable.filter(college => {
+          return college.college_name.toLowerCase().includes(this.searchText.toLowerCase()) ||
+                college.college_id.toString().includes(this.searchText) ||
+                college.province.toLowerCase().includes(this.searchText.toLowerCase()) ||
+                college.city.toLowerCase().includes(this.searchText.toLowerCase()) ||
+                college.college_type.toLowerCase().includes(this.searchText.toLowerCase()); 
+        });
+      }
+    },
+    clearSearch() {
+      this.searchText = '';
+      this.filteredColleges = this.resultShowTable;  // 确保清空搜索时显示全部数据
+    }
+
+  }
+});
+</script>
+  
+<style lang="less">
+  
+  .myel-dialog {
+    .el-input__inner {
+        background-color: transparent;
+        color: black;
+        border: 1px solid #31cae4;
+      }
+  
+      .el-range-editor .el-range-input {
+        background-color: transparent;
+        color: black;
+  
+      }
+  
+      .el-date-editor .el-range-separator{
+        color: black;
+      }
+  
+      .el-cascader-panel{
+        background-color: transparent;
+        border: 1px solid #31cae4;
+      }
+  
+      .el-cascader-dropdown__item {
+        font-size: 7px;
+        line-height: 20px;
+        color: black;
+        font-weight: 200;
+        background-color: transparent;
+      }
+      .el-cascader-dropdown {
+        background-color: transparent;
+        border: 1px solid #31cae4;
+      }
+      .el-cascader-dropdown__list {
+        padding: 0;
+      }
+      .el-popper[x-placement^="bottom"] {
+        margin-top: 0px;
+      }
+      .el-popper .popper__arrow,
+      .el-popper .popper__arrow::after {
+        display: none;
+      }
+      .el-cascader-dropdown__item:hover {
+    background-color: #28AAF7;
+  }
+}
+  .center {
+      width: 100%;
+      height: 100%;
+      margin: 0px;
+      padding: 0px;
+      display: flex;
+      flex-direction: column;
+
+      .cc-header {
+          height: 15px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 20px;
+      }
+
+      .cc-top {
+            width: 100%;
+            margin-top: 8%;
+            height: 100%;
+            display: flex;
+        }
+
+        .cc-left {
+            width: 33%;
+            height: 100%;
+            /*display: flex;*/
+        }
+
+        .sx{
+            /* float:left; */
+            /* margin-top: 30px; */
+            width: 1px;
+            height: 80%;
+            background: darkgray;
+            /* margin-left: 800px; */
+        }
+
+  }
+</style>
+
+<style>
+/* 解决自定义滚动条 x 轴显示问题 */
+.el-scrollbar__wrap {
+        overflow-x: hidden;
+        &::-webkit-scrollbar { 
+          /* 整个滚动条 */
+            width: 0;  
+            /* 纵向滚动条的宽度 */
+            background: rgba(213,215,220,0.3);
+            border: none;
+        }
+        &::-webkit-scrollbar-track { 
+          /* // 滚动条轨道 */
+            border: none;
+        }
+    }
+    .el-table__body-wrapper {
+        &::-webkit-scrollbar { 
+          /* // 整个滚动条 */
+            width: 0; 
+            /* // 纵向滚动条的宽度 */
+            background: rgba(213,215,220,0.3);
+            border: none;
+        }
+        &::-webkit-scrollbar-track {
+           /* // 滚动条轨道 */
+            border: none;
+        }
+    }
+    .el-table, .el-table__expanded-cell {
+    background-color: transparent;
+  }
+  /* 全局修改el-table 表头和内容颜色 header color content color */
+.el-table th {
+  background: #093664 !important;
+  .cell{
+    font-weight: 400;
+    color: #F6F9FC !important;
+  }
+}
+    .el-table__body tbody tr:nth-child(odd) {
+        background-color: #003B51;
+        .cell{
+    font-weight: 400;
+    color: #F6F9FC !important;
+  }
+    }
+    .el-table__body tbody tr:nth-child(even) td {
+        background-color: #0A2732;
+        .cell{
+    font-weight: 400;
+    color: #F6F9FC !important;
+  }
+    }
+    
+  .el-input__inner {
+        background-color: transparent;
+        color: white;
+        border: 1px solid #31cae4;
+      }
+  
+      .el-range-editor .el-range-input {
+        background-color: transparent;
+        color: white;
+  
+        /* border: 1px solid #31cae4; */
+      }
+  
+      .el-date-editor .el-range-separator{
+        color: aliceblue;
+      }
+  
+      .el-cascader-panel{
+        background-color: transparent;
+        border: 1px solid #31cae4;
+      }
+  
+      .el-cascader-dropdown__item {
+        font-size: 7px;
+        line-height: 20px;
+        color: white;
+        font-weight: 200;
+        background-color: transparent;
+      }
+      .el-cascader-dropdown {
+        background-color: transparent;
+        border: 1px solid #31cae4;
+      }
+      .el-cascader-dropdown__list {
+        padding: 0;
+      }
+      .el-popper[x-placement^="bottom"] {
+        margin-top: 0px;
+      }
+      .el-popper .popper__arrow,
+      .el-popper .popper__arrow::after {
+        display: none;
+      }
+      .el-cascader-dropdown__item:hover {
+    background-color: #28AAF7;
+  }
+</style>
+
+
+</body>
+</html>

@@ -1,0 +1,639 @@
+<!doctype html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta charset="utf-8">
+<title>容器智能编排子系统</title>
+<link href="css/style.css"  rel="stylesheet" type="text/css" media="all" />
+<script src="
+./js/echarts.min.js"></script>
+<script src="./js/echarts-gl.min.js"></script>
+<script src="js/jquery-3.2.0.min.js" charset="utf-8"></script>
+<script src="beijing.js"></script>
+<link rel="stylesheet" href="./js/element_ui.css">
+<!-- 引入组件库 -->
+<script src="./js/element-ui.js"></script>
+
+<link href="../styles/common.css" rel="stylesheet">
+<link href="../styles/bootstrap-table.css" rel="stylesheet">
+<link href="../styles/pagination.css" rel="stylesheet">
+<script src="../scripts/common.js"></script>
+<script src="../scripts/chronic.js"></script>
+
+<body>
+  <div class="wpbox" id="app">
+      <div class="bnt">
+          <div class="topbnt_left fl">
+            <ul>
+              <li class="active"><a href="./collegeInfo.html">大学信息</a></li>
+              <li><a href="./teacher.html">招生人员</a></li>
+              <li><a href="./admin.html">管理员</a></li>
+            </ul>
+          </div>
+          <h1 class="tith1 fl">寻找好大学</h1>
+          <div class="topbnt_left fr">
+            <ul>
+              <li><a href="./admin.html">用户：admin</a></li>
+              <li><a href="./home.html">退出</a></li>
+            </ul>
+        </div>
+      </div>
+
+      <div class="left1" style="width: 95%; margin-top: -50px;">
+
+        <!-- 用户列表start -->
+        <div class="arightboxbott" style="height: 95%;">
+          <h2 class="tith2 pt1">用户列表</h2>
+
+          <!-- 搜索框start -->
+          <div class="search-bar" style="width: 90%; margin: 0 auto; text-align: center;">
+            <el-input
+              v-model="searchText"
+              placeholder="请输入用户名，邮箱或用户权限"
+              clearable
+              @clear="clearSearch"
+              @keyup.enter.native="searchUser"
+            >
+              <el-button slot="append" icon="el-icon-search" @click="searchUser"></el-button>
+            </el-input>
+          </div>
+          <!-- 搜索框end -->
+
+          <!-- 滚动列表start -->
+          <el-table
+            hover-row="false"
+            :data="filteredUsers.length ? filteredUsers : resultShowTable"
+            border 
+            style="width: 90%; margin: 10px auto 0; overflow-y: auto;"
+            height="700px"> <!-- 设置高度 -->
+            <el-table-column
+              prop="id"
+              label="用户id" align="center"
+              width="100">
+            </el-table-column>
+            <el-table-column
+              prop="name"
+              label="用户名" align="center"
+              width="150">
+            </el-table-column>
+            <el-table-column
+              prop="pwd"
+              label="用户密码" align="center">
+            </el-table-column>
+            <el-table-column
+              prop="email"
+              label="邮箱" align="center">
+            </el-table-column>
+            <el-table-column
+              prop="register_date"
+              label="注册时间" align="center"
+              :formatter="formatDate">
+            </el-table-column>
+            <el-table-column
+              prop="login_date"
+              label="上次登录时间" align="center"
+              :formatter="formatDate">
+            </el-table-column>
+            <el-table-column
+              prop="privilege"
+              label="用户权限" align="center">
+            </el-table-column>
+            <el-table-column 
+              prop="apply" 
+              label="权限申请" align="center">
+              <template slot-scope="scope">
+                <div style="display: flex; justify-content: center; align-items: center;">
+                  <el-button :type="scope.row.apply ? 'danger' : 'info'" @click="viewApply(scope.row)" size="mini">查看详情</el-button>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column prop="option" label="操作" align="center">
+              <template slot-scope="scope">
+                <div style="display: flex; justify-content: center; align-items: center;">
+                  <!-- 按钮触发编辑用户信息的对话框 -->
+                  <el-button @click="editUserInfo(row)" type="primary" size="mini">修改</el-button>
+
+                  <!-- 编辑用户信息的对话框 -->
+                  <el-dialog
+                    title="编辑用户信息"
+                    :visible.sync="dialogVisible"
+                    width="30%"
+                  >
+                    <el-form :model="formData">
+                      <el-form-item label="用户名">
+                        <el-input v-model="formData.username" autocomplete="off"></el-input>
+                      </el-form-item>
+                      <el-form-item label="密码">
+                        <el-input type="password" v-model="formData.password" autocomplete="off"></el-input>
+                      </el-form-item>
+                      <el-form-item label="权限">
+                        <el-input v-model="formData.privilege" autocomplete="off"></el-input>
+                      </el-form-item>
+                    </el-form>
+                    <span slot="footer" class="dialog-footer">
+                      <el-button @click="dialogVisible = false">取消</el-button>
+                      <el-button type="primary" @click="saveUserInfo">保存</el-button>
+                    </span>
+                  </el-dialog>
+                  <!-- 编辑用户信息的对话框end -->
+
+                  <el-button @click="removeUser(scope.row)" type="primary" size="mini" style="margin-left: 10px;">删除</el-button>
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+          <!-- 滚动列表end -->
+        </div>
+        <!-- 用户列表end -->
+      </div>
+
+      <div class="mrbox prbox"  style="width: 50%;height: 125%;">
+        <div class="mrbox_bottom" style="margin-top: 3%;">
+        </div>
+      </div>
+                 
+  </div>
+      
+
+
+<script src="./js/axios.min.js"></script>
+<script src="./js/qs.min.js"></script>
+<script src="./js/vue.js"></script>
+<script src="./js/element-ui.js"></script>
+<script src="./js/moment.js"></script>
+<script src="./js/xlsx.core.min.js"></script>
+<script src="./js/datav.map.vue.js"></script>
+
+<script>
+
+// 创建 Vue 实例
+new Vue({
+  el: '#app',
+  data: {
+
+    searchText: '',
+    filteredUsers: [],
+
+    dialogVisible: false,
+    formData: {
+      username: '',
+      password: '',
+      privilege: ''
+    },
+    resultShowTable:[
+      {
+        id: 1,
+        name: "admin",
+        pwd: "admin",
+        email: "2470082927@qq.com",
+        register_date: "2024-02-12 08:29:13",
+        login_date:"2024-04-16 13:20:10",
+        privilege:"普通用户；管理员"
+      },
+      {
+        id: 2,
+        name: "user2",
+        pwd: "qwe",
+        email: "user2@example.com",
+        register_date: "2024-03-13 09:45:21",
+        login_date:"2024-03-15 14:35:18",
+        privilege:"招生人员"
+      },
+      {
+        id: 3,
+        name: "user3",
+        pwd: "zxc",
+        email: "user3@example.com",
+        register_date: "2024-03-14 12:10:05",
+        login_date:"2024-03-16 09:55:42",
+        privilege:"普通用户",
+        apply:"申请：招生人员"
+      },
+      {
+        id: 4,
+        name: "user4",
+        pwd: "rty",
+        email: "user4@example.com",
+        register_date: "2024-03-15 15:20:37",
+        login_date:"2024-03-17 16:45:29",
+        privilege:"普通用户"
+      },
+      {
+        id: 5,
+        name: "user5",
+        pwd: "fgh",
+        email: "user5@example.com",
+        register_date: "2024-03-16 18:30:12",
+        login_date:"2024-03-18 19:25:56",
+        privilege:"招生人员",
+        apply:"申请：普通用户"
+      },
+      {
+        id: 6,
+        name: "user6",
+        pwd: "vbn",
+        email: "user6@example.com",
+        register_date: "2024-03-17 21:40:44",
+        login_date:"2024-03-19 22:15:33",
+        privilege:"普通用户"
+      },
+      {
+        id: 7,
+        name: "user7",
+        pwd: "uio",
+        email: "user7@example.com",
+        register_date: "2024-03-18 00:50:19",
+        login_date:"2024-03-20 01:05:09",
+        privilege:"普通用户"
+      },
+      {
+        id: 8,
+        name: "user8",
+        pwd: "jkl",
+        email: "user8@example.com",
+        register_date: "2024-03-19 04:00:51",
+        login_date:"2024-03-21 04:44:45",
+        privilege:"普通用户"
+      },
+      {
+        id: 9,
+        name: "user9",
+        pwd: "mnb",
+        email: "user9@example.com",
+        register_date: "2024-03-20 07:10:26",
+        login_date:"2024-03-22 07:24:21",
+        privilege:"普通用户"
+      },
+      {
+        id: 10,
+        name: "user10",
+        pwd: "poi",
+        email: "user10@example.com",
+        register_date: "2024-03-21 10:20:58",
+        login_date:"2024-03-23 10:03:57",
+        privilege:"普通用户"
+      },
+      {
+        id: 11,
+        name: "user11",
+        pwd: "abc",
+        email: "user11@example.com",
+        register_date: "2024-03-24 12:30:15",
+        login_date:"2024-03-26 15:55:28",
+        privilege:"招生人员",
+        apply:"申请：普通用户"
+      },
+      {
+        id: 12,
+        name: "user12",
+        pwd: "def",
+        email: "user12@example.com",
+        register_date: "2024-03-25 16:40:47",
+        login_date:"2024-03-27 18:25:33",
+        privilege:"普通用户"
+      },
+      {
+        id: 13,
+        name: "user13",
+        pwd: "ghi",
+        email: "user13@example.com",
+        register_date: "2024-03-26 19:50:19",
+        login_date:"2024-03-28 21:05:09",
+        privilege:"普通用户"
+      },
+      {
+        id: 14,
+        name: "user14",
+        pwd: "jkl",
+        email: "user14@example.com",
+        register_date: "2024-03-27 22:00:51",
+        login_date:"2024-03-29 23:44:45",
+        privilege:"普通用户"
+      },
+      {
+        id: 15,
+        name: "user15",
+        pwd: "mno",
+        email: "user15@example.com",
+        register_date: "2024-03-28 01:10:26",
+        login_date:"2024-03-30 02:24:21",
+        privilege:"普通用户"
+      },
+      {
+        id: 16,
+        name: "user16",
+        pwd: "pqr",
+        email: "user16@example.com",
+        register_date: "2024-03-29 04:20:58",
+        login_date:"2024-03-31 05:03:57",
+        privilege:"普通用户"
+      },
+      {
+        id: 17,
+        name: "user17",
+        pwd: "stu",
+        email: "user17@example.com",
+        register_date: "2024-03-30 07:30:32",
+        login_date:"2024-04-01 08:15:27",
+        privilege:"普通用户"
+      },
+      {
+        id: 18,
+        name: "user18",
+        pwd: "vwx",
+        email: "user18@example.com",
+        register_date: "2024-03-31 10:40:04",
+        login_date:"2024-04-02 11:35:59",
+        privilege:"普通用户"
+      },
+      {
+        id: 19,
+        name: "user19",
+        pwd: "yz1",
+        email: "user19@example.com",
+        register_date: "2024-04-01 13:50:37",
+        login_date:"2024-04-03 14:45:32",
+        privilege:"普通用户"
+      },
+      {
+        id: 20,
+        name: "user20",
+        pwd: "234",
+        email: "user20@example.com",
+        register_date: "2024-04-02 17:00:09",
+        login_date:"2024-04-04 18:55:04",
+        privilege:"普通用户"
+      }
+    ] 
+  },
+  methods: {
+    viewApply(row) {
+      this.$prompt(row.apply, '权限申请详情', {
+        confirmButtonText: '通过',
+        cancelButtonText: '拒绝',
+        showInput:false,
+        beforeClose: (action, instance, done) => {
+          if (action === 'confirm') {
+            // 处理通过逻辑
+            
+            console.log('通过的值:', instance.inputValue); // instance.inputValue 可以用来获取对话框中的输入内容
+            // 这里可以调用API或其他逻辑处理“通过”操作
+            done();
+          } else if (action === 'cancel') {
+            // 处理拒绝逻辑
+            done();
+          }
+        }
+      }).then(({ value }) => {
+        // 这里处理按下“通过”后的逻辑，如果你需要
+        console.log('Confirmed value:', value);
+      }).catch(() => {
+        // 这里处理取消操作，通常是用户点击“拒绝”
+        console.log('Permission request denied');
+      });
+    },
+    editUserInfo(row) {
+      this.formData = {...row}; // 填充表单数据
+      this.dialogVisible = true; // 显示对话框
+    },
+    saveUserInfo() {
+      console.log('Saving user info:', this.formData);
+      // 这里添加您的保存逻辑
+      this.dialogVisible = false; // 关闭对话框
+    },
+    removeUser(row) {
+      this.$confirm('确认删除这个用户吗?', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const index = this.resultShowTable.findIndex(user => user.id === row.id);
+        if (index !== -1) {
+          this.resultShowTable.splice(index, 1);
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });
+      });
+    },
+    searchUser() {
+      if (!this.searchText.trim()) {
+        // 如果搜索框为空或只有空格，显示所有用户
+        this.filteredUsers = this.resultShowTable;
+
+      } else {
+        // 过滤 resultShowTable，根据 searchText 筛选用户，搜索不到则显示空用户列表
+        const lowercasedSearchText = this.searchText.toLowerCase();
+        this.filteredUsers = this.resultShowTable.filter(user =>
+          user.name.toLowerCase().includes(lowercasedSearchText) ||
+          user.email.toLowerCase().includes(lowercasedSearchText) ||
+          (user.privilege && user.privilege.toLowerCase().includes(lowercasedSearchText))
+        );
+      }
+    }
+  }
+});
+</script>
+
+<style lang="less">
+  
+  .myel-dialog {
+    .el-input__inner {
+        background-color: transparent;
+        color: black;
+        border: 1px solid #31cae4;
+      }
+  
+      .el-range-editor .el-range-input {
+        background-color: transparent;
+        color: black;
+  
+      }
+  
+      .el-date-editor .el-range-separator{
+        color: black;
+      }
+  
+      .el-cascader-panel{
+        background-color: transparent;
+        border: 1px solid #31cae4;
+      }
+  
+      .el-cascader-dropdown__item {
+        font-size: 7px;
+        line-height: 20px;
+        color: black;
+        font-weight: 200;
+        background-color: transparent;
+      }
+      .el-cascader-dropdown {
+        background-color: transparent;
+        border: 1px solid #31cae4;
+      }
+      .el-cascader-dropdown__list {
+        padding: 0;
+      }
+      .el-popper[x-placement^="bottom"] {
+        margin-top: 0px;
+      }
+      .el-popper .popper__arrow,
+      .el-popper .popper__arrow::after {
+        display: none;
+      }
+      .el-cascader-dropdown__item:hover {
+    background-color: #28AAF7;
+  }
+}
+  .center {
+      width: 100%;
+      height: 100%;
+      margin: 0px;
+      padding: 0px;
+      display: flex;
+      flex-direction: column;
+
+      .cc-header {
+          height: 15px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 20px;
+      }
+
+      .cc-top {
+            width: 100%;
+            margin-top: 8%;
+            height: 100%;
+            display: flex;
+        }
+
+        .cc-left {
+            width: 33%;
+            height: 100%;
+            /*display: flex;*/
+        }
+
+        .sx{
+            /* float:left; */
+            /* margin-top: 30px; */
+            width: 1px;
+            height: 80%;
+            background: darkgray;
+            /* margin-left: 800px; */
+        }
+
+  }
+</style>
+
+<style>
+/* 解决自定义滚动条 x 轴显示问题 */
+.el-scrollbar__wrap {
+        overflow-x: hidden;
+        &::-webkit-scrollbar { 
+          /* 整个滚动条 */
+            width: 0;  
+            /* 纵向滚动条的宽度 */
+            background: rgba(213,215,220,0.3);
+            border: none;
+        }
+        &::-webkit-scrollbar-track { 
+          /* // 滚动条轨道 */
+            border: none;
+        }
+    }
+    .el-table__body-wrapper {
+        &::-webkit-scrollbar { 
+          /* // 整个滚动条 */
+            width: 0; 
+            /* // 纵向滚动条的宽度 */
+            background: rgba(213,215,220,0.3);
+            border: none;
+        }
+        &::-webkit-scrollbar-track {
+           /* // 滚动条轨道 */
+            border: none;
+        }
+    }
+    .el-table, .el-table__expanded-cell {
+    background-color: transparent;
+  }
+  /* 全局修改el-table 表头和内容颜色 header color content color */
+.el-table th {
+  background: #093664 !important;
+  .cell{
+    font-weight: 400;
+    color: #F6F9FC !important;
+  }
+}
+    .el-table__body tbody tr:nth-child(odd) {
+        background-color: #003B51;
+        .cell{
+    font-weight: 400;
+    color: #F6F9FC !important;
+  }
+    }
+    .el-table__body tbody tr:nth-child(even) td {
+        background-color: #0A2732;
+        .cell{
+    font-weight: 400;
+    color: #F6F9FC !important;
+  }
+    }
+    
+  .el-input__inner {
+        background-color: transparent;
+        color: white;
+        border: 1px solid #31cae4;
+      }
+  
+      .el-range-editor .el-range-input {
+        background-color: transparent;
+        color: white;
+  
+        /* border: 1px solid #31cae4; */
+      }
+  
+      .el-date-editor .el-range-separator{
+        color: aliceblue;
+      }
+  
+      .el-cascader-panel{
+        background-color: transparent;
+        border: 1px solid #31cae4;
+      }
+  
+      .el-cascader-dropdown__item {
+        font-size: 7px;
+        line-height: 20px;
+        color: white;
+        font-weight: 200;
+        background-color: transparent;
+      }
+      .el-cascader-dropdown {
+        background-color: transparent;
+        border: 1px solid #31cae4;
+      }
+      .el-cascader-dropdown__list {
+        padding: 0;
+      }
+      .el-popper[x-placement^="bottom"] {
+        margin-top: 0px;
+      }
+      .el-popper .popper__arrow,
+      .el-popper .popper__arrow::after {
+        display: none;
+      }
+      .el-cascader-dropdown__item:hover {
+    background-color: #28AAF7;
+  }
+</style>
+
+
+</body>
+
+</html>

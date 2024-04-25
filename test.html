@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vue Table Example</title>
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<body>
+<div id="app">
+  <!-- 搜索框start -->
+  <div class="search-bar" style="width: 90%; margin: 0 auto; text-align: center;">
+    <el-input
+      v-model="searchText"
+      placeholder="请输入大学ID，大学名称"
+      @input="filterData"
+    >
+    </el-input>
+  </div>
+  <!-- 搜索框end -->
+
+  <!-- 滚动列表start -->
+  <el-table
+    :data="filteredColleges.length ? filteredColleges : resultShowTable"
+    border 
+    style="width: 90%; margin: 10px auto 0; overflow-y: auto;"
+    height="700px">
+    <el-table-column prop="college_id" label="大学id" align="center" width="100"></el-table-column>
+    <el-table-column prop="college_name" label="大学名称" align="center" width="150"></el-table-column>
+    <el-table-column prop="min_fee" label="最低学费" align="center"></el-table-column>
+    <el-table-column prop="max_fee" label="最高学费" align="center"></el-table-column>
+    <el-table-column prop="college_rank" label="大学排名" align="center"></el-table-column>
+    <el-table-column prop="college_type" label="大学类型" align="center"></el-table-column>
+    <el-table-column prop="has_doctoral_point" label="博士点有无" align="center"></el-table-column>
+    <el-table-column prop="province" label="省份" align="center"></el-table-column>
+    <el-table-column prop="city" label="城市" align="center"></el-table-column>
+    <el-table-column prop="dormitory_id" label="宿舍楼标识" align="center"></el-table-column>
+    <el-table-column prop="canteen_id" label="食堂标识" align="center"></el-table-column>
+  </el-table>
+  <!-- 滚动列表end -->
+</div>
+
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script>
+new Vue({
+  el: '#app',
+  data: {
+    searchText: '',
+    filteredColleges: [],
+    resultShowTable: [
+      // 示例数据
+      { college_id: 1, college_name: "College 1", min_fee: 1000, max_fee: 2000, college_rank: 1, college_type: "985", has_doctoral_point: "yes", province: "beijing", city: "beijing", dormitory_id: 1, canteen_id: 1 },
+      { college_id: 2, college_name: "College 2", min_fee: 1500, max_fee: 2500, college_rank: 2, college_type: "211", has_doctoral_point: "no", province: "shanghai", city: "shanghai", dormitory_id: 2, canteen_id: 2 },
+      // 更多数据
+    ]
+  },
+  methods: {
+    filterData() {
+      if (!this.searchText) {
+        this.filteredColleges = [];
+      } else {
+        this.filteredColleges = this.resultShowTable.filter(college => {
+          return college.college_name.toLowerCase().includes(this.searchText.toLowerCase()) ||
+                 college.college_id.toString().includes(this.searchText);
+        });
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
